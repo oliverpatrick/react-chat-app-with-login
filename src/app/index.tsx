@@ -5,28 +5,33 @@
  * This component is the skeleton around the actual pages, and should only
  * contain code that should be seen on all pages. (e.g. navigation bar)
  */
+import 'firebase/firestore';
+import { auth } from '../firebase';
 
-import * as React from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
+
 import { Helmet } from 'react-helmet-async';
-import { Switch, Route, BrowserRouter } from 'react-router-dom';
-
+import { Switch, Route, BrowserRouter, Redirect } from 'react-router-dom';
 import { GlobalStyle } from 'styles/global-styles';
 
-import { HomePage } from './pages/HomePage/Loadable';
-// import { ChatPage } from './pages/ChatPage/Loadable';
-import { NotFoundPage } from './components/NotFoundPage/Loadable';
+import { io } from 'socket.io-client';
+
 import { useTranslation } from 'react-i18next';
 
-import { io } from 'socket.io-client';
+import { HomePage } from './pages/HomePage/Loadable';
+import { NotFoundPage } from './components/NotFoundPage/Loadable';
 import RegisterPage from './pages/FormPages/RegisterPage/RegisterPage';
 import { LoginPage } from './pages/FormPages/LoginPage/LoginPage';
 import { ChatPage } from './pages/ChatPage';
-import ConversationsPage from './pages/ConversationsPage/ConversationsPage';
+import ConversationsPage from './pages/MessengerPage/MessengerPage';
 import ForgottenPasswordPage from './pages/FormPages/ForgottenPasswordPage/ForgottenPasswordPage';
+
 const socket = io('/');
 
 export function App() {
   const { i18n } = useTranslation();
+  const [user] = useAuthState(auth);
+
   return (
     <BrowserRouter>
       <Helmet
@@ -39,15 +44,18 @@ export function App() {
 
       <Switch>
         <Route exact path="/">
-          <HomePage />
+          {user ? <HomePage /> : <Route component={LoginPage} />}
         </Route>
         <Route path="/chats">
-          {/* <Route path="/chat/:channel/:username"> */}
           <ChatPage socket={socket} />
         </Route>
         <Route path="/conversations" component={ConversationsPage} />
-        <Route path="/signin" component={LoginPage} />
-        <Route path="/register" component={RegisterPage} />
+        <Route path="/signin">
+          {user ? <Redirect to="/" /> : <Route component={LoginPage} />}
+        </Route>
+        <Route path="/register">
+          {user ? <Redirect to="/" /> : <Route component={RegisterPage} />}
+        </Route>
         <Route path="/reset-password" component={ForgottenPasswordPage} />
         <Route component={NotFoundPage} />
       </Switch>

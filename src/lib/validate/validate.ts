@@ -30,13 +30,8 @@ export default function validate(values): SetStateAction<{
     errors.password = 'Password is required';
   } else if (values.password.length < 8) {
     errors.password = 'Password needs to be 8 characters or more';
-  } else if (
-    !/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/.test(
-      values.password,
-    )
-  ) {
-    errors.password =
-      'Password must contain 1 capital letter and special character.';
+  } else if (values.password.match(/^[A-Za-z]\w{7,14}$/)) {
+    errors.password = 'Password must contain 1 capital letter and 1 numeric.';
   }
 
   if (

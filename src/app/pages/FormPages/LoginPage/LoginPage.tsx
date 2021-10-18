@@ -1,25 +1,48 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
+import {
+  auth,
+  signInWithEmailAndPassword,
+  signInWithGoogle,
+} from '../../../../firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 import {
   InlineContainer,
   FormPageLayout,
   FormPageContainer,
-  PasswordMemory,
+  UserMemory,
 } from '../FormPageContainer';
 
 export function LoginPage() {
-  const [username, setUsername] = useState('');
-  const [channel, setChannel] = useState('');
-  const [rememberPassword, setRememberPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberUser, setRememberUser] = useState(false);
+  const [user, loading, error] = useAuthState(auth);
+  const history = useHistory();
 
-  const handleRememberPassword = e => {
-    setRememberPassword(!rememberPassword);
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    if (user) history.replace('/');
+  }, [user, loading]);
+
+  const handleRememberUser = e => {
+    setRememberUser(!rememberUser);
 
     //save email to cookies
+    if (!rememberUser) {
+      localStorage.removeItem('email');
+    } else if (rememberUser) {
+      localStorage.setItem('email', email);
+    }
   };
+
+  console.log(user);
 
   return (
     <>
@@ -36,36 +59,43 @@ export function LoginPage() {
             <input
               name="email"
               placeholder="Email Address"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
             ></input>
             <label htmlFor="password">Password</label>
             <input
               name="password"
               type="password"
               placeholder="Password"
-              value={channel}
-              onChange={e => setChannel(e.target.value)}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
             ></input>
             <InlineContainer>
-              <PasswordMemory>
-                <label htmlFor="passwordMemory">
+              <UserMemory>
+                <label htmlFor="userMemory">
                   <input
                     type="checkbox"
-                    name="passwordMemory"
-                    checked={rememberPassword}
-                    onChange={handleRememberPassword}
+                    name="userMemory"
+                    checked={rememberUser}
+                    onChange={handleRememberUser}
                   ></input>
                   Remember Me
                 </label>
-              </PasswordMemory>
+              </UserMemory>
               <Link to="/reset-password">
                 <p>Forgot password?</p>
               </Link>
             </InlineContainer>
 
-            <Link to={`/chat/${channel}/${username}`}>
-              <button onClick={undefined}>Sign In</button>
+            <Link to={`/`}>
+              <button
+                onClick={() => signInWithEmailAndPassword(email, password)}
+              >
+                Sign In
+              </button>
+            </Link>
+            <Link to={`/`}>
+              <button onClick={() => signInWithGoogle()}>Google</button>
             </Link>
           </form>
           <p>

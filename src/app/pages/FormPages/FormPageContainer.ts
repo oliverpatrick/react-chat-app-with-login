@@ -102,7 +102,7 @@ export const InlineContainer = styled.div`
   font-size: 0.85rem;
 `;
 
-export const PasswordMemory = styled.div`
+export const UserMemory = styled.div`
   label {
     padding: 0;
     display: flex;

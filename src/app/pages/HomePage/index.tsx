@@ -1,28 +1,14 @@
-// import Alert from 'app/components/Alert/Alert';
-// import * as React from 'react';
-// import { useState } from 'react';
+import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
-
-// import {
-//   InlineContainer,
-//   FormPageLayout,
-//   FormPageContainer,
-// } from '../FormPages/FormPageContainer';
+import ChatOnline from 'app/components/ChatOnline/ChatOnline';
+import Conversation from 'app/components/Conversation/Conversation';
+import { logout } from 'firebase';
+import styled from 'styled-components/macro';
 
 export function HomePage() {
-  // const [username, setUsername] = useState('');
-  // const [channel, setChannel] = useState('');
-  // const [alert, setAlert] = useState(false);
-
-  // const sendData = () => {
-  //   if (username !== '' && channel !== '') {
-  //     socket.emit('joinRoom', { username, channel });
-  //   } else {
-  //     setAlert(true);
-  //     window.location.reload();
-  //   }
-  // };
+  const [conversations, setConversations] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [currentChat, setCurrentChat] = useState(null);
 
   return (
     <>
@@ -30,42 +16,83 @@ export function HomePage() {
         <title>Home Page</title>
         <meta name="description" content="A Boilerplate application homepage" />
       </Helmet>
-      Home Page
-      {/* <FormPageLayout>
-        <FormPageContainer>
-          <h1>Login</h1>
-          <input
-            placeholder="Email Address"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-          ></input>
-          <input
-            type="password"
-            placeholder="Password"
-            value={channel}
-            onChange={e => setChannel(e.target.value)}
-          ></input>
-          <InlineContainer>
-            <div>
-              <input type="checkbox"></input>
-              <label>Remember Me</label>
-            </div>
-            <Link to="">
-              <p>Forgot password?</p>
-            </Link>
-          </InlineContainer>
 
-          <Link to={`/chat/${channel}/${username}`}>
-            <button onClick={undefined}>Sign In</button>
-          </Link>
-          <p>
-            Haven't got an account?{' '}
-            <span>
-              <Link to="/register">Sign up</Link>
-            </span>
-          </p>
-        </FormPageContainer> */}
-      {/* </FormPageLayout> */}
+      <button onClick={() => logout()}>Sign out</button>
+      <div className="chatWrapper">
+        <ChatBoxWrapper>
+          <ChatMenuInput placeholder="Search for friends" />
+          {conversations.map(c => (
+            <div onClick={() => setCurrentChat(c)}>
+              <Conversation conversation={c} currentUser={'user'} />
+            </div>
+          ))}
+        </ChatBoxWrapper>
+      </div>
+      <div className="chatOnline">
+        <ChatWrapper>
+          <ChatOnline
+            onlineUsers={onlineUsers}
+            currentId={'user._id'}
+            setCurrentChat={setCurrentChat}
+          />
+        </ChatWrapper>
+      </div>
     </>
   );
 }
+
+const ChatMenuInput = styled.input`
+  width: 90%;
+  padding: 10px 0;
+  border: none;
+  border-bottom: 1px solid gray;
+`;
+
+const ChatBoxWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+`;
+
+const ChatWrapper = styled.div`
+  padding: 10px;
+  height: 100%;
+`;
+
+// .chatBoxTop {
+//   height: 100%;
+//   overflow-y: scroll;
+//   padding-right: 10px;
+// }
+
+// .chatBoxBottom {
+//   margin-top: 5px;
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+// }
+
+// .chatMessageInput {
+//   width: 80%;
+//   height: 90px;
+//   padding: 10px;
+// }
+
+// .chatSubmitButton {
+//   width: 70px;
+//   height: 40px;
+//   border: none;
+//   border-radius: 5px;
+//   cursor: pointer;
+//   background-color: teal;
+//   color: white;
+// }
+
+// .noConversationText {
+//   position: absolute;
+//   top: 10%;
+//   font-size: 50px;
+//   color: rgb(224, 220, 220);
+//   cursor: default;
+// }
